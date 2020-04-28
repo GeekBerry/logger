@@ -1,10 +1,13 @@
 const assert = require('assert');
-const pathLib = require('path');
-
 const LogStream = require('./LogStream');
 const { openWriteStream, makeDirectory, renameFile, unlinkFile, createTime } = require('./util');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+function yyyymmdd(timestamp) {
+  const date = new Date(timestamp);
+  return date.toISOString().slice(0, 10);
+}
 
 class DailyFileStream extends LogStream {
   constructor({
@@ -21,12 +24,6 @@ class DailyFileStream extends LogStream {
     this.openDay = 0;
   }
 
-  pathOfTime(timestamp) {
-    const date = new Date(timestamp);
-    const { dir, name, ext } = pathLib.parse(this.path);
-    return pathLib.format({ dir, name: `${name}.${date.toISOString().slice(0, 10)}`, ext });
-  }
-
   async opened() {
     const now = Date.now();
     const today = Math.floor(now / DAY_MS);
@@ -34,9 +31,10 @@ class DailyFileStream extends LogStream {
     if (this.openDay < today) {
       await this.close();
 
-      if (createTime(this.path) < today * DAY_MS) {
-        renameFile(this.path, this.pathOfTime(now - DAY_MS));
-        unlinkFile(this.pathOfTime(now - DAY_MS * this.days));
+      const createTime = createTime(this.path);
+      if (createTime < today * DAY_MS) {
+        renameFile(this.path, `${this.path}.${yyyymmdd(createTime)}`);
+        unlinkFile(`${this.path}.${yyyymmdd(now - DAY_MS * this.days)}`);
       }
 
       this.stream = await openWriteStream(this.path, { flags: 'a' });
