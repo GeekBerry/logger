@@ -1,6 +1,6 @@
 const assert = require('assert');
 const LogStream = require('./LogStream');
-const { openWriteStream, makeDirectory, renameFile, unlinkFile, createTime } = require('./util');
+const util = require('./util');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -16,7 +16,7 @@ class DailyFileStream extends LogStream {
     days = 30,
   }) {
     assert(Number.isInteger(days) && days > 1, `days must be integer>0, got ${days}`);
-    makeDirectory(path);
+    util.makeDirectory(path);
 
     super({ level });
     this.path = path;
@@ -31,13 +31,13 @@ class DailyFileStream extends LogStream {
     if (this.openDay < today) {
       await this.close();
 
-      const createTime = createTime(this.path);
+      const createTime = util.createTime(this.path);
       if (createTime < today * DAY_MS) {
-        renameFile(this.path, `${this.path}.${yyyymmdd(createTime)}`);
-        unlinkFile(`${this.path}.${yyyymmdd(now - DAY_MS * this.days)}`);
+        util.renameFile(this.path, `${this.path}.${yyyymmdd(createTime)}`);
+        util.unlinkFile(`${this.path}.${yyyymmdd(now - DAY_MS * this.days)}`);
       }
 
-      this.stream = await openWriteStream(this.path, { flags: 'a' });
+      this.stream = await util.openWriteStream(this.path, { flags: 'a' });
       this.openDay = today; // day start seconds
     }
   }
