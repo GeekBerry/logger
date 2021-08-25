@@ -6,11 +6,15 @@
   "author": "<geekberry@qq.com>",
   "main": "src/index.js",
   "keywords": [
-    "logger"
+    "logger",
+    "trace"
   ],
   "files": [
     "src"
   ],
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
   "scripts": {
     "public": "yarn publish --access=public"
   }

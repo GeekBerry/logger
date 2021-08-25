@@ -4,6 +4,14 @@ const util = require('./util');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * @param timestamp {number}
+ * @return {string} : "YYYY-MM-DD"
+ *
+ * @example
+ * > yyyymmdd(Date.now())
+ "2021-08-25"
+ */
 function yyyymmdd(timestamp) {
   const date = new Date(timestamp);
   return date.toISOString().slice(0, 10);
